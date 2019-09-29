@@ -52,7 +52,7 @@ text {
 </style>
 
 <!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3.v5.js"></script>
 <script src="utils.js"></script>
 
 <div id="my_dataviz"> </div>
@@ -162,7 +162,7 @@ var displayBars = function(g_bar, nested_data, config) {
                         return config.scaleY(shift_index) - lineHeight * 15;
                     })
         shift_index += 1;
-                        
+
     })
 }
 
@@ -206,7 +206,7 @@ var update_barchart = function(g_bar, data, config) {
                 return d3.sum(leaves, function(leaf) { return leaf["value.sum"] });
             })
             .entries(filtered_data)
-        
+
         display_programmes(g_bar, nested_data, config);
         displaySubProgrammes(g_bar, nested_data, config);
         displayBars(g_bar, nested_data, config);
@@ -229,15 +229,16 @@ var svg = d3.select("#my_dataviz")
         .classed("svg-content-responsive", true)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    var g_bar = svg.append("g");
+  var g_bar = svg.append("g");
 
-    d3.queue()
-        .defer(d3.json, url.replace("XXX", "Health"))
-        .defer(d3.json, dept_url)
-        .await(function(error, data, departmentData) {
-            if (error) {
-                console.log("Something went wrong: " + error);
-            } else {
+  var promises = [
+      d3.json(url.replace("XXX", "Health")),
+      d3.json(dept_url),
+  ];
+
+  Promise.all(promises).then(function(values) {
+      var data = values[0];
+      var departmentData = values[1];
                 data = data.cells;
                 departmentData = departmentData.cells;
 
@@ -272,9 +273,6 @@ var svg = d3.select("#my_dataviz")
                         .text(function(d) { return d.key;})
 
                 funcDisplay();
-            }
+  });
 
-
-        })
 </script>
-
